@@ -30,12 +30,19 @@ import java.util.concurrent.atomic.AtomicLong;
  /**
  * XSTR - Xorshift ThermiteRandom
  * Modified by Bogdan-G
- * 30.05.2016
+ * 03.06.2016
+ * version 0.0.4
  */
 public class XSTR extends Random {
 
     private static final long serialVersionUID = 6208727693524452904L;
     private long seed;
+    private long last;
+    private static final long GAMMA = 0x9e3779b97f4a7c15L;
+    private static final int PROBE_INCREMENT = 0x9e3779b9;
+    private static final long SEEDER_INCREMENT = 0xbb67ae8584caa73bL;
+    private static final double DOUBLE_UNIT = 0x1.0p-53;  // 1.0  / (1L << 53)
+    private static final float  FLOAT_UNIT  = 0x1.0p-24f; // 1.0f / (1 << 24)
 
     /*
      MODIFIED BY: Robotia
@@ -76,7 +83,6 @@ public class XSTR extends Random {
     public boolean nextBoolean() {
         return next(1) != 0;
     }
-    private static final double DOUBLE_UNIT = 0x1.0p-53; // 1.0 / (1L << 53)
     
     public double nextDouble() {
         return (((long)(next(26)) << 27) + next(27)) * DOUBLE_UNIT;
@@ -218,13 +224,31 @@ public class XSTR extends Random {
                 ;
         }
         return r;*/
-        int last = seed ^ (seed << 21);
+        last = seed ^ (seed << 21);
         last ^= (last >>> 35);
         last ^= (last << 4);
+        seed = last;
         int out = (int) last % bound;
         return (out < 0) ? -out : out;
     }
     public int nextInt() {
         return next(32);
-    }    
+    }
+
+    public float nextFloat() {
+        return next(24) * FLOAT_UNIT;
+     }
+
+    public long nextLong() {
+        // it's okay that the bottom word remains signed.
+        return ((long)(next(32)) << 32) + next(32);
+    }
+
+    public void nextBytes(byte[] bytes_arr) {
+        for (int iba = 0, lenba = bytes_arr.length; iba < lenba; )
+                for (int rndba = nextInt(),
+                                nba = Math.min(lenba - iba, Integer.SIZE/Byte.SIZE);
+                        nba-- > 0; rndba >>= Byte.SIZE)
+                        bytes_arr[iba++] = (byte)rndba;
+        }
 }
