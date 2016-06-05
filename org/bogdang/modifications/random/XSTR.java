@@ -224,6 +224,7 @@ public class XSTR extends Random {
                 ;
         }
         return r;*/
+        //speedup, new nextInt ~+40%
         last = seed ^ (seed << 21);
         last ^= (last >>> 35);
         last ^= (last << 4);
