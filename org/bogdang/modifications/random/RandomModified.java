@@ -109,12 +109,15 @@ public class RandomModified extends Random {
     }
 
     public synchronized long getSeed() {
-        return seed;
+        return this.seed;
     }
 
     protected int next(int bits) {
-        long oldseed, nextseed;
-        do {
+        long oldseed=1L, nextseed=1L;
+        int bigloop = 1000000; //fix infinity(or many times) loop
+        label: do {
+            if (bigloop<=0) break label;
+            bigloop--;
             oldseed = this.seed;
             nextseed = (oldseed * multiplier + addend) & mask;
         } while (!seedUniquifier.compareAndSet(oldseed, nextseed));
