@@ -66,30 +66,35 @@ public class GeneratorEntropy implements java.io.Serializable {
         String line;
         while((line = br.readLine()) != null) {data_s=line;}
         } catch (Exception e) {cpw.mods.fml.common.FMLLog.log(org.apache.logging.log4j.Level.WARN, (Throwable)e, "GeneratorEntropy stacktrace: %s", (Throwable)e);}
-        char[] data_char = data_s.toCharArray();
-        long[] Long_array = new long[data_char.length/15+1];
+        String[] source = data_s.split("");
+        String[] data_str_array;
+        if (source[0].length()==0) {
+            data_str_array = new String[source.length-1];
+            System.arraycopy(source, 1, data_str_array, 0, source.length-1);
+        } else {
+            data_str_array = source;
+        }
+        long[] Long_array = new long[data_str_array.length/15+1];
         int j=0;
-        for (int i=0;i<data_char.length;i++) {
+        for (int i=0;i<data_str_array.length;i++) {
         StringBuilder sb = new StringBuilder();
         int k=5;
-        for (;i<data_char.length && k!=0;i++) {
+        for (;i<data_str_array.length && k!=0;i++) {
             if (xstr.nextInt(10)==0) {
-            char[] char_array = new char[3];
-            char_array[0]=data_char[i];i++;
-            if (i<data_char.length) { 
-                char_array[1]=data_char[i];i++;
-                if (i<data_char.length) { 
-                    char_array[2]=data_char[i];i++;
-                    //if (i<data_char.length) { 
-                        //char_array[3]=data_char[i];
-                    //}
+            sb.append(data_str_array[i]);i++;
+            if (i<data_str_array.length) { 
+                sb.append(data_str_array[i]);i++;
+                if (i<data_str_array.length) { 
+                    sb.append(data_str_array[i]);i++;
                 }
             }
-            sb.append(new String(char_array));
             k--;
             }
         }
-        Long_array[j]=Long.parseLong(new String(sb), 16);j++;
+        String temp = String.valueOf(sb);
+        if (temp.length()!=0) Long_array[j]=Long.parseLong(temp, 16);
+        else Long_array[j]=Long.parseLong("0", 16);
+        j++;
         }
         long rl = Long_array[xstr.nextInt(Long_array.length)];
         return rl==0?xstr.getSeed():rl;
